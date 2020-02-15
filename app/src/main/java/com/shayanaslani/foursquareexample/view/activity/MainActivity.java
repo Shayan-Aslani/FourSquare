@@ -1,8 +1,10 @@
-package com.shayanaslani.foursquareexample;
+package com.shayanaslani.foursquareexample.view.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.shayanaslani.foursquareexample.R;
 
 public class MainActivity extends AppCompatActivity {
 
