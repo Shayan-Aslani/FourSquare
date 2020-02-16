@@ -3,6 +3,7 @@ package com.shayanaslani.foursquareexample.view.fragment;
 
 import android.os.Bundle;
 
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shayanaslani.foursquareexample.R;
+import com.shayanaslani.foursquareexample.databinding.FragmentPlaceListBinding;
 
 
 /**
@@ -17,6 +19,7 @@ import com.shayanaslani.foursquareexample.R;
  */
 public class PlaceListFragment extends Fragment {
 
+    private FragmentPlaceListBinding mBinding ;
 
     public static PlaceListFragment newInstance() {
 
@@ -36,7 +39,9 @@ public class PlaceListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_place_list, container, false);
+        mBinding = DataBindingUtil.inflate(inflater , R.layout.fragment_place_list, container, false);
+
+        return mBinding.getRoot();
     }
 
 }

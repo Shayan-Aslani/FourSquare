@@ -3,6 +3,7 @@ package com.shayanaslani.foursquareexample.view.fragment;
 
 import android.os.Bundle;
 
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.shayanaslani.foursquareexample.R;
 import com.shayanaslani.foursquareexample.Repository;
+import com.shayanaslani.foursquareexample.databinding.FragmentPlaceDetailBinding;
 import com.shayanaslani.foursquareexample.network.RetrofitInstance;
 
 import retrofit2.Retrofit;
@@ -21,6 +23,8 @@ import retrofit2.Retrofit;
  */
 public class PlaceDetailFragment extends Fragment {
 
+
+    private FragmentPlaceDetailBinding mBinding ;
 
     public static PlaceDetailFragment newInstance() {
         
@@ -41,7 +45,9 @@ public class PlaceDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        return inflater.inflate(R.layout.fragment_place_detail, container, false);
+        mBinding = DataBindingUtil.inflate(inflater , R.layout.fragment_place_detail, container, false);
+
+        return mBinding.getRoot();
     }
 
 }
