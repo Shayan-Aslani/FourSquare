@@ -10,12 +10,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shayanaslani.foursquareexample.R;
+import com.shayanaslani.foursquareexample.Repository;
+import com.shayanaslani.foursquareexample.network.RetrofitInstance;
+
+import retrofit2.Retrofit;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class PlaceDetailFragment extends Fragment {
+
 
     public static PlaceDetailFragment newInstance() {
         
@@ -35,6 +40,7 @@ public class PlaceDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_place_detail, container, false);
     }
 
