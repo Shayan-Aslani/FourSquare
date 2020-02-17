@@ -3,6 +3,7 @@ package com.shayanaslani.foursquareexample.adapters;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.shayanaslani.foursquareexample.R;
 import com.shayanaslani.foursquareexample.databinding.ItemVenueListBinding;
+import com.shayanaslani.foursquareexample.eventbus.OnVenueClickedMessage;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -66,6 +70,11 @@ public class VenueItemsAdapter extends RecyclerView.Adapter<VenueItemsAdapter.Ve
             mItems = items;
             mBinding.venueAddressTv.setText(mItems.getVenue().getLocation().getAddress());
             mBinding.venueNameTv.setText(mItems.getVenue().getName());
+
+            itemView.setOnClickListener(view -> {
+                EventBus.getDefault().post(new OnVenueClickedMessage(mItems.getVenue().getId()));
+            });
         }
+
     }
 }
