@@ -11,7 +11,7 @@ import retrofit2.http.Query;
 public interface FoursquareService {
 
     @GET("explore")
-    Call<FourSquareJSON> loadFromApi(@Query("latLng") String latLng);
+    Call<FourSquareJSON> loadFromApi(@Query("ll") String latLng);
 
 //    @GET("{id}")
 //    Call<> loadDetailsFromApi(@Path("id") String venueId);

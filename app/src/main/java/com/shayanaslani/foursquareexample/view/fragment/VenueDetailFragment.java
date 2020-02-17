@@ -11,26 +11,28 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shayanaslani.foursquareexample.R;
-import com.shayanaslani.foursquareexample.databinding.FragmentPlaceListBinding;
+import com.shayanaslani.foursquareexample.databinding.FragmentVenueDetailBinding;
+import com.shayanaslani.foursquareexample.databinding.FragmentVenueListBinding;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class PlaceListFragment extends Fragment {
+public class VenueDetailFragment extends Fragment {
 
-    private FragmentPlaceListBinding mBinding ;
 
-    public static PlaceListFragment newInstance() {
+    private FragmentVenueDetailBinding mBinding ;
 
+    public static VenueDetailFragment newInstance() {
+        
         Bundle args = new Bundle();
-
-        PlaceListFragment fragment = new PlaceListFragment();
+        
+        VenueDetailFragment fragment = new VenueDetailFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
-    public PlaceListFragment() {
+    public VenueDetailFragment() {
         // Required empty public constructor
     }
 
@@ -39,7 +41,8 @@ public class PlaceListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mBinding = DataBindingUtil.inflate(inflater , R.layout.fragment_place_list, container, false);
+
+        mBinding = DataBindingUtil.inflate(inflater , R.layout.fragment_venue_detail, container, false);
 
         return mBinding.getRoot();
     }

@@ -1,18 +1,17 @@
 package com.shayanaslani.foursquareexample.view.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.os.Bundle;
 
 import com.shayanaslani.foursquareexample.R;
-import com.shayanaslani.foursquareexample.view.fragment.PlaceListFragment;
+import com.shayanaslani.foursquareexample.view.fragment.VenueListFragment;
 
 public class MainActivity extends SingleFragmentActivity {
 
     @Override
     public Fragment createFragment() {
-        return PlaceListFragment.newInstance();
+        return VenueListFragment.newInstance();
     }
 
     @Override
