@@ -1,12 +1,19 @@
 package com.shayanaslani.foursquareexample.network;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.shayanaslani.foursquareexample.model.Venue;
+
 import java.io.IOException;
+import java.util.List;
 
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -27,6 +34,16 @@ public class RetrofitInstance {
         return instance;
     }
 
+    private static Converter.Factory createGsonConverter() {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(new TypeToken<List<Venue>>() {}.getType(), new VenueListDeserializer())
+                .registerTypeAdapter(Venue.class , new VenueDetailDeserializer())
+                .create();
+
+        return GsonConverterFactory.create(gson);
+    }
+
+
     public Retrofit getRetrofit(){
         return mRetrofit;
     }
@@ -38,11 +55,10 @@ public class RetrofitInstance {
 
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(createGsonConverter())
                 .client(client)
                 .build();
     }
-
 
     private static class BasicAuthInterceptor implements Interceptor {
 

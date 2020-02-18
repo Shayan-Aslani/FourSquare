@@ -26,7 +26,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.shayanaslani.foursquareexample.R;
-import com.shayanaslani.foursquareexample.adapters.VenueItemsAdapter;
+import com.shayanaslani.foursquareexample.adapters.VenueAdapter;
 import com.shayanaslani.foursquareexample.databinding.FragmentVenueListBinding;
 import com.shayanaslani.foursquareexample.viewmodel.VenueListFragmentViewModel;
 
@@ -42,7 +42,7 @@ public class VenueListFragment extends Fragment {
     private FragmentVenueListBinding mBinding;
     private VenueListFragmentViewModel mViewModel;
 
-    private VenueItemsAdapter venueItemsAdapter;
+    private VenueAdapter venueAdapter;
 
     public static VenueListFragment newInstance() {
 
@@ -67,6 +67,18 @@ public class VenueListFragment extends Fragment {
         if (!isLocationEnabled()) {
             requestLocation();
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -97,16 +109,16 @@ public class VenueListFragment extends Fragment {
         mViewModel.loadVenueListFromApi(new LatLng(35.69, 51.40));
 
         mViewModel.getVenueItemsLiveData().observe(this, items -> {
-            venueItemsAdapter.setVenueItemsList(items);
+            venueAdapter.setVenueList(items);
         });
 
         return mBinding.getRoot();
     }
 
     private void setupRecyclerView() {
-        venueItemsAdapter = new VenueItemsAdapter(getContext());
+        venueAdapter = new VenueAdapter(getContext());
         mBinding.placeListRv.setLayoutManager(new LinearLayoutManager(getContext()));
-        mBinding.placeListRv.setAdapter(venueItemsAdapter);
+        mBinding.placeListRv.setAdapter(venueAdapter);
     }
 
     private boolean checkPermissions() {

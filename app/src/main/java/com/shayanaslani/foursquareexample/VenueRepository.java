@@ -2,11 +2,13 @@ package com.shayanaslani.foursquareexample;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.shayanaslani.foursquareexample.model.FourSquareJSON;
+import com.shayanaslani.foursquareexample.model.Venue;
 import com.shayanaslani.foursquareexample.network.FoursquareService;
 import com.shayanaslani.foursquareexample.network.RetrofitInstance;
 
@@ -21,7 +23,7 @@ public class VenueRepository {
     private static VenueRepository mInstance ;
     private Context mContext ;
 
-    private MutableLiveData<List<FourSquareJSON.Items>> mVenueItems = new MutableLiveData<>();
+    private MutableLiveData<List<Venue>> mVenueItems = new MutableLiveData<>();
 
     public static VenueRepository getInstance(Context context){
         if(mInstance == null)
@@ -33,29 +35,42 @@ public class VenueRepository {
         mContext = context;
     }
 
-    public MutableLiveData<List<FourSquareJSON.Items>> getVenueItems() {
+    public MutableLiveData<List<Venue>> getVenueItems() {
         return mVenueItems;
     }
 
-    public MutableLiveData<List<FourSquareJSON.Items>> loadVenuesFromApi(LatLng latLng){
+    public MutableLiveData<List<Venue>> loadVenuesFromApi(LatLng latLng){
         String latLngString = latLng.latitude + "," + latLng.longitude ;
-        RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadFromApi(latLngString).enqueue(new Callback<FourSquareJSON>() {
+        RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadFromApi(latLngString).enqueue(new Callback<List<Venue>>() {
             @Override
-            public void onResponse(Call<FourSquareJSON> call, Response<FourSquareJSON> response) {
+            public void onResponse(Call<List<Venue>> call, Response<List<Venue>> response) {
                 if(response.isSuccessful())
-                    mVenueItems.postValue(response.body().getResponse().getGroups().get(0).getItems());
+                    mVenueItems.postValue(response.body());
             }
 
             @Override
-            public void onFailure(Call<FourSquareJSON> call, Throwable t) {
-
+            public void onFailure(Call<List<Venue>> call, Throwable t) {
+                Log.d("network" , t.getMessage());
             }
         });
-
         return mVenueItems;
     }
 
-    public void loadVenueDetailsById(String id){
-
+    public LiveData<Venue> loadVenueDetailsById(String id){
+        MutableLiveData<Venue> venueMutableLiveData = new MutableLiveData<>();
+        RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadDetailsFromApi(id).
+                enqueue(new Callback<Venue>() {
+                    @Override
+                    public void onResponse(Call<Venue> call, Response<Venue> response) {
+                        if(response.isSuccessful()){
+                            venueMutableLiveData.postValue(response.body());
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Venue> call, Throwable t) {
+                        Log.d("network" , t.getMessage());
+                    }
+                });
+        return venueMutableLiveData;
     }
 }

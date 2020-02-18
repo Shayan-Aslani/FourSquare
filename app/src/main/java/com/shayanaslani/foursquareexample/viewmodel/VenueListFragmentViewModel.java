@@ -6,12 +6,10 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.shayanaslani.foursquareexample.VenueRepository;
-import com.shayanaslani.foursquareexample.model.FourSquareJSON;
-import com.shayanaslani.foursquareexample.network.RetrofitInstance;
+import com.shayanaslani.foursquareexample.model.Venue;
 
 import java.util.List;
 
@@ -20,7 +18,7 @@ public class VenueListFragmentViewModel extends AndroidViewModel {
     private Context mContext ;
     private VenueRepository mRepository ;
 
-    private LiveData<List<FourSquareJSON.Items>> mVenueItems ;
+    private LiveData<List<Venue>> mVenueItems ;
 
     public VenueListFragmentViewModel(@NonNull Application application) {
         super(application);
@@ -29,7 +27,7 @@ public class VenueListFragmentViewModel extends AndroidViewModel {
         mVenueItems = mRepository.getVenueItems();
     }
 
-    public LiveData<List<FourSquareJSON.Items>> getVenueItemsLiveData (){
+    public LiveData<List<Venue>> getVenueItemsLiveData (){
         return mVenueItems ;
     }
 
