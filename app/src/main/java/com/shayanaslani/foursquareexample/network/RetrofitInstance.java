@@ -3,11 +3,14 @@ package com.shayanaslani.foursquareexample.network;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.shayanaslani.foursquareexample.model.VenueListResponse;
 import com.shayanaslani.foursquareexample.model.VenuePhotoItem;
 import com.shayanaslani.foursquareexample.model.Venue;
 import com.shayanaslani.foursquareexample.network.deserializer.VenueDetailDeserializer;
 import com.shayanaslani.foursquareexample.network.deserializer.VenueListDeserializer;
+import com.shayanaslani.foursquareexample.network.deserializer.VenueListResponseDeserializer;
 import com.shayanaslani.foursquareexample.network.deserializer.VenuePhotosDeserializer;
+import com.shayanaslani.foursquareexample.repository.VenueRepository;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,6 +46,7 @@ public class RetrofitInstance {
                 .registerTypeAdapter(new TypeToken<List<Venue>>() {}.getType(), new VenueListDeserializer())
                 .registerTypeAdapter(Venue.class , new VenueDetailDeserializer())
                 .registerTypeAdapter(new TypeToken<List<VenuePhotoItem>>() {}.getType() , new VenuePhotosDeserializer())
+                .registerTypeAdapter(VenueListResponse.class , new VenueListResponseDeserializer())
                 .create();
 
         return GsonConverterFactory.create(gson);

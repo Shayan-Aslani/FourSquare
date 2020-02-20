@@ -135,7 +135,7 @@ public class VenueListFragment extends Fragment {
         setScrollListener();
     }
 
-    private void setScrollListener(){
+    private void setScrollListener() {
         mBinding.placeListRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -146,11 +146,10 @@ public class VenueListFragment extends Fragment {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                if(mViewModel.isLastItem())
-                    venueAdapter.setLastItem(true);
-                else {
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == venueAdapter.getItemCount() - 1)
-                        mViewModel.loadVenueListFromApi(new LatLng(35.6, 51.4), false);
+                if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == venueAdapter.getItemCount() - 1
+                        && !mViewModel.isLastItem()) {
+                    mViewModel.loadVenueListFromApi(null, false);
+                    venueAdapter.setLastItem(mViewModel.isLastItem());
                 }
             }
         });
@@ -206,7 +205,7 @@ public class VenueListFragment extends Fragment {
             @Override
             public void onLocationChanged(Location location) {
                 Toast.makeText(getContext(), "location received", Toast.LENGTH_SHORT).show();
-                mViewModel.loadVenueListFromApi(new LatLng(location.getLatitude(), location.getLongitude()) , true);
+                mViewModel.loadVenueListFromApi(new LatLng(location.getLatitude(), location.getLongitude()), true);
                 mBinding.venueListProgressbar.setVisibility(View.VISIBLE);
                 mBinding.placeListRv.setVisibility(View.GONE);
             }

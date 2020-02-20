@@ -39,17 +39,16 @@ public class VenueListFragmentViewModel extends AndroidViewModel {
         if(newLatLng) {
             offset = 0 ;
             this.latLng = latLng;
-            mVenueItems.setValue(new ArrayList<>());
-            mRepository.loadVenuesFromApi(latLng, offset);
-        }
-        else {
+            mRepository.loadVenuesFromApi(latLng, offset , true);
+        } else {
             offset += 30 ;
-            mRepository.loadVenuesFromApi(this.latLng , offset);
+            mRepository.loadVenuesFromApi(this.latLng , offset , false);
         }
     }
 
     public boolean isLastItem(){
-
+        if(offset >= mRepository.getTotalResults())
+            return true;
         return false;
     }
 }
