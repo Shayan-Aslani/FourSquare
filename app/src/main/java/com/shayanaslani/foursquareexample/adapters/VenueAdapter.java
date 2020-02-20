@@ -25,12 +25,7 @@ public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
 
-    private boolean isLastItem = false ;
-
-    public void setLastItem(boolean lastItem) {
-        isLastItem = lastItem;
-        notifyDataSetChanged();
-    }
+    private boolean isLastPage = false ;
 
     private List<Venue> venueList;
     private Context mContext;
@@ -41,6 +36,12 @@ public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public void setVenueList(List<Venue> list) {
         venueList = list;
+        notifyDataSetChanged();
+    }
+
+
+    public void setIsLastPage(boolean isLastPage) {
+        this.isLastPage = isLastPage;
         notifyDataSetChanged();
     }
 
@@ -65,7 +66,6 @@ public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof VenueHolder)
             ((VenueHolder) holder).bind((venueList.get(position)));
-
     }
 
     @Override
@@ -75,7 +75,7 @@ public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public int getItemViewType(int position) {
-        if(isLastItem)
+        if(isLastPage)
             return VIEW_TYPE_ITEM;
         return position == venueList.size() - 1  ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }

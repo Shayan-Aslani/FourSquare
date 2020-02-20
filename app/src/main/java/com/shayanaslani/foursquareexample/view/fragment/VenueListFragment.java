@@ -149,7 +149,7 @@ public class VenueListFragment extends Fragment {
                 if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == venueAdapter.getItemCount() - 1
                         && !mViewModel.isLastItem()) {
                     mViewModel.loadVenueListFromApi(null, false);
-                    venueAdapter.setLastItem(mViewModel.isLastItem());
+                    venueAdapter.setIsLastPage(mViewModel.isLastItem());
                 }
             }
         });
