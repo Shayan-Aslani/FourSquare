@@ -13,7 +13,7 @@ import retrofit2.http.Query;
 public interface FoursquareService {
 
     @GET("explore")
-    Call<List<Venue>> loadFromApi(@Query("ll") String latLng);
+    Call<List<Venue>> loadFromApi(@Query("ll") String latLng , @Query("offset") int offset);
 
     @GET("{id}")
     Call<Venue> loadDetailsFromApi(@Path("id") String venueId);

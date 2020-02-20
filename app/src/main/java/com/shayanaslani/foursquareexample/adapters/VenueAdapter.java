@@ -2,15 +2,9 @@ package com.shayanaslani.foursquareexample.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.text.style.BackgroundColorSpan;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,19 +14,22 @@ import com.shayanaslani.foursquareexample.databinding.ItemVenueLoadingBinding;
 import com.shayanaslani.foursquareexample.eventbus.OnVenueClickedMessage;
 import com.shayanaslani.foursquareexample.model.Venue;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Transformation;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
-
-import static java.security.AccessController.getContext;
 
 
 public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
+
+    private boolean isLastItem = false ;
+
+    public void setLastItem(boolean lastItem) {
+        isLastItem = lastItem;
+    }
 
     private List<Venue> venueList;
     private Context mContext;
@@ -43,6 +40,11 @@ public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public void setVenueList(List<Venue> list) {
         venueList = list;
+        notifyDataSetChanged();
+    }
+
+    public void addToVenueList(List<Venue> list){
+        venueList.addAll(list);
         notifyDataSetChanged();
     }
 
@@ -72,6 +74,8 @@ public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public int getItemCount() {
+        if(isLastItem)
+            return venueList == null ? 0 : venueList.size() ;
         return venueList == null ? 0 : venueList.size()+1;
     }
 

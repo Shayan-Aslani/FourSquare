@@ -13,6 +13,7 @@ import com.shayanaslani.foursquareexample.model.Venue;
 import com.shayanaslani.foursquareexample.network.FoursquareService;
 import com.shayanaslani.foursquareexample.network.RetrofitInstance;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -36,19 +37,25 @@ public class VenueRepository {
 
     private VenueRepository(Context context) {
         mContext = context;
+        mVenueItems.postValue(new ArrayList<>());
     }
 
     public MutableLiveData<List<Venue>> getVenueItems() {
         return mVenueItems;
     }
 
-    public MutableLiveData<List<Venue>> loadVenuesFromApi(LatLng latLng){
+    public MutableLiveData<List<Venue>> loadVenuesFromApi(LatLng latLng , int offset){
         String latLngString = latLng.latitude + "," + latLng.longitude ;
-        RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadFromApi(latLngString).enqueue(new Callback<List<Venue>>() {
+
+        RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadFromApi(latLngString , offset).
+                enqueue(new Callback<List<Venue>>() {
             @Override
             public void onResponse(Call<List<Venue>> call, Response<List<Venue>> response) {
-                if(response.isSuccessful())
-                    mVenueItems.postValue(response.body());
+                if(response.isSuccessful()) {
+                    List<Venue> list = mVenueItems.getValue();
+                    list.addAll(response.body());
+                    mVenueItems.postValue(list);
+                }
             }
 
             @Override
