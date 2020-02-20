@@ -8,7 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.shayanaslani.foursquareexample.VenueRepository;
+import com.shayanaslani.foursquareexample.repository.VenueRepository;
 import com.shayanaslani.foursquareexample.model.Venue;
 
 import java.util.List;

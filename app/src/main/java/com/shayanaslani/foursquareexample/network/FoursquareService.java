@@ -1,5 +1,6 @@
 package com.shayanaslani.foursquareexample.network;
 
+import com.shayanaslani.foursquareexample.model.VenuePhotoItem;
 import com.shayanaslani.foursquareexample.model.Venue;
 
 import java.util.List;
@@ -16,4 +17,7 @@ public interface FoursquareService {
 
     @GET("{id}")
     Call<Venue> loadDetailsFromApi(@Path("id") String venueId);
+
+    @GET("{id}/photos")
+    Call<List<VenuePhotoItem>> loadVenuePhotos(@Path("id") String venueId, @Query("limit") String limit);
 }

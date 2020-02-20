@@ -2,10 +2,12 @@ package com.shayanaslani.foursquareexample.view.fragment;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
@@ -28,7 +30,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.shayanaslani.foursquareexample.R;
 import com.shayanaslani.foursquareexample.adapters.VenueAdapter;
 import com.shayanaslani.foursquareexample.databinding.FragmentVenueListBinding;
+import com.shayanaslani.foursquareexample.eventbus.OnVenueClickedMessage;
 import com.shayanaslani.foursquareexample.viewmodel.VenueListFragmentViewModel;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -39,10 +46,11 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 public class VenueListFragment extends Fragment {
 
     public static final int PERMISSION_ID = 100;
-    private FragmentVenueListBinding mBinding;
-    private VenueListFragmentViewModel mViewModel;
 
     private VenueAdapter venueAdapter;
+
+    private FragmentVenueListBinding mBinding;
+    private VenueListFragmentViewModel mViewModel;
 
     public static VenueListFragment newInstance() {
 
@@ -65,7 +73,10 @@ public class VenueListFragment extends Fragment {
             requestPermission();
         }
         if (!isLocationEnabled()) {
-            requestLocation();
+            requestLocationAccess();
+        }
+        if (isLocationEnabled() && checkPermissions()) {
+            requestNewLocationData();
         }
     }
 
@@ -86,7 +97,7 @@ public class VenueListFragment extends Fragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_ID) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getContext(), "permissin", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "permission granted", Toast.LENGTH_SHORT).show();
             } else if (shouldShowRequestPermissionRationale(ACCESS_FINE_LOCATION)) {
                 new AlertDialog.Builder(getActivity())
                         .setMessage("You need to allow access to both the permissions")
@@ -101,16 +112,17 @@ public class VenueListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_venue_list, container, false);
 
         setupRecyclerView();
 
-        mViewModel.loadVenueListFromApi(new LatLng(35.69, 51.40));
-
         mViewModel.getVenueItemsLiveData().observe(this, items -> {
+            mBinding.venueListProgressbar.setVisibility(View.GONE);
+            mBinding.placeListRv.setVisibility(View.VISIBLE);
             venueAdapter.setVenueList(items);
         });
+
+        mBinding.venueListLocationFab.setOnClickListener(view -> requestNewLocationData());
 
         return mBinding.getRoot();
     }
@@ -119,6 +131,15 @@ public class VenueListFragment extends Fragment {
         venueAdapter = new VenueAdapter(getContext());
         mBinding.placeListRv.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.placeListRv.setAdapter(venueAdapter);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void OnVenueItemClicked(OnVenueClickedMessage onVenueClickedMessage) {
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, VenueDetailFragment.newInstance(onVenueClickedMessage.getVenueId()))
+                .addToBackStack(null)
+                .commit();
     }
 
     private boolean checkPermissions() {
@@ -143,15 +164,57 @@ public class VenueListFragment extends Fragment {
         );
     }
 
-    private void requestLocation() {
+    private void requestLocationAccess() {
         new AlertDialog.Builder(getActivity())
                 .setMessage("You need to turn on location")
                 .setPositiveButton("Turn on", (dialogInterface, i) -> {
-                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(intent);
-                        })
+                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(intent);
+                })
                 .setNegativeButton("Cancel", null)
                 .create()
                 .show();
+    }
+
+
+    @SuppressLint("MissingPermission")
+    private void requestNewLocationData() {
+
+        android.location.LocationListener locationListener = new android.location.LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                Toast.makeText(getContext(), "location received", Toast.LENGTH_SHORT).show();
+                mViewModel.loadVenueListFromApi(new LatLng(location.getLatitude(), location.getLongitude()));
+                mBinding.venueListProgressbar.setVisibility(View.VISIBLE);
+                mBinding.placeListRv.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+
+            }
+        };
+
+        int minTime = 1000;
+        float minDistance = 150;
+        LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setSpeedRequired(false);
+        String bestProvider = locationManager.getBestProvider(criteria, false);
+        locationManager.requestLocationUpdates(bestProvider, minTime, minDistance, locationListener);
     }
 }

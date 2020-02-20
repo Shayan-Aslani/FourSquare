@@ -1,4 +1,4 @@
-package com.shayanaslani.foursquareexample;
+package com.shayanaslani.foursquareexample.repository;
 
 import android.content.Context;
 import android.util.Log;
@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.shayanaslani.foursquareexample.model.VenuePhotoItem;
 import com.shayanaslani.foursquareexample.model.Venue;
 import com.shayanaslani.foursquareexample.network.FoursquareService;
 import com.shayanaslani.foursquareexample.network.RetrofitInstance;
@@ -20,6 +21,8 @@ import retrofit2.Response;
 
 public class VenueRepository {
 
+    public static final String NETWORK_TAG = "network";
+
     private static VenueRepository mInstance ;
     private Context mContext ;
 
@@ -28,9 +31,9 @@ public class VenueRepository {
     public static VenueRepository getInstance(Context context){
         if(mInstance == null)
             return new VenueRepository(context);
-
         return mInstance;
     }
+
     private VenueRepository(Context context) {
         mContext = context;
     }
@@ -50,7 +53,7 @@ public class VenueRepository {
 
             @Override
             public void onFailure(Call<List<Venue>> call, Throwable t) {
-                Log.d("network" , t.getMessage());
+                Log.d(NETWORK_TAG , t.getMessage());
             }
         });
         return mVenueItems;
@@ -68,9 +71,29 @@ public class VenueRepository {
                     }
                     @Override
                     public void onFailure(Call<Venue> call, Throwable t) {
-                        Log.d("network" , t.getMessage());
+                        Log.d(NETWORK_TAG , t.getMessage());
                     }
                 });
         return venueMutableLiveData;
+    }
+
+    public LiveData<List<VenuePhotoItem>> loadVenuePhotos(String id , String limit){
+        MutableLiveData<List<VenuePhotoItem>> photosResponseMutableLiveData = new MutableLiveData<>();
+        RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadVenuePhotos(id , limit)
+                .enqueue(new Callback<List<VenuePhotoItem>>() {
+            @Override
+            public void onResponse(Call<List<VenuePhotoItem>> call, Response<List<VenuePhotoItem>> response) {
+                if(response.isSuccessful())
+                    photosResponseMutableLiveData.postValue(response.body());
+                else if(response.raw().code() == 429)
+                    Toast.makeText(mContext, "Quota exceeded", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<List<VenuePhotoItem>> call, Throwable t) {
+                Log.d(NETWORK_TAG , t.getMessage());
+            }
+        });
+        return photosResponseMutableLiveData;
     }
 }

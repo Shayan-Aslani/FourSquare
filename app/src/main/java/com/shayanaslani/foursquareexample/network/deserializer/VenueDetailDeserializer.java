@@ -1,4 +1,4 @@
-package com.shayanaslani.foursquareexample.network;
+package com.shayanaslani.foursquareexample.network.deserializer;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
