@@ -19,6 +19,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -131,6 +132,27 @@ public class VenueListFragment extends Fragment {
         venueAdapter = new VenueAdapter(getContext());
         mBinding.placeListRv.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.placeListRv.setAdapter(venueAdapter);
+        setScrollListener();
+    }
+
+    private void setScrollListener() {
+        mBinding.placeListRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == venueAdapter.getItemCount() - 1
+                        && !mViewModel.isLastItem()) {
+                    mViewModel.loadVenueListFromApi(null, false);
+                    venueAdapter.setIsLastPage(mViewModel.isLastItem());
+                }
+            }
+        });
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -176,7 +198,6 @@ public class VenueListFragment extends Fragment {
                 .show();
     }
 
-
     @SuppressLint("MissingPermission")
     private void requestNewLocationData() {
 
@@ -184,7 +205,7 @@ public class VenueListFragment extends Fragment {
             @Override
             public void onLocationChanged(Location location) {
                 Toast.makeText(getContext(), "location received", Toast.LENGTH_SHORT).show();
-                mViewModel.loadVenueListFromApi(new LatLng(location.getLatitude(), location.getLongitude()));
+                mViewModel.loadVenueListFromApi(new LatLng(location.getLatitude(), location.getLongitude()), true);
                 mBinding.venueListProgressbar.setVisibility(View.VISIBLE);
                 mBinding.placeListRv.setVisibility(View.GONE);
             }

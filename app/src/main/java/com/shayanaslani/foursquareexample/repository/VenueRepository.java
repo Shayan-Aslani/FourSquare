@@ -8,11 +8,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.shayanaslani.foursquareexample.model.VenueListResponse;
 import com.shayanaslani.foursquareexample.model.VenuePhotoItem;
 import com.shayanaslani.foursquareexample.model.Venue;
 import com.shayanaslani.foursquareexample.network.FoursquareService;
 import com.shayanaslani.foursquareexample.network.RetrofitInstance;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -27,6 +29,7 @@ public class VenueRepository {
     private Context mContext ;
 
     private MutableLiveData<List<Venue>> mVenueItems = new MutableLiveData<>();
+    private int totalResults = 0 ;
 
     public static VenueRepository getInstance(Context context){
         if(mInstance == null)
@@ -36,27 +39,35 @@ public class VenueRepository {
 
     private VenueRepository(Context context) {
         mContext = context;
+        mVenueItems.postValue(new ArrayList<>());
     }
 
     public MutableLiveData<List<Venue>> getVenueItems() {
         return mVenueItems;
     }
 
-    public MutableLiveData<List<Venue>> loadVenuesFromApi(LatLng latLng){
+    public void loadVenuesFromApi(LatLng latLng , int offset , boolean newLatLng){
         String latLngString = latLng.latitude + "," + latLng.longitude ;
-        RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadFromApi(latLngString).enqueue(new Callback<List<Venue>>() {
+
+        if(newLatLng)
+            mVenueItems.setValue(new ArrayList<>());
+        RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadFromApi(latLngString , offset).
+                enqueue(new Callback<VenueListResponse>() {
             @Override
-            public void onResponse(Call<List<Venue>> call, Response<List<Venue>> response) {
-                if(response.isSuccessful())
-                    mVenueItems.postValue(response.body());
+            public void onResponse(Call<VenueListResponse> call, Response<VenueListResponse> response) {
+                if(response.isSuccessful()) {
+                    List<Venue> list = mVenueItems.getValue();
+                    list.addAll(response.body().getVenueList());
+                    mVenueItems.postValue(list);
+                    totalResults = response.body().getTotalResults();
+                }
             }
 
             @Override
-            public void onFailure(Call<List<Venue>> call, Throwable t) {
+            public void onFailure(Call<VenueListResponse> call, Throwable t) {
                 Log.d(NETWORK_TAG , t.getMessage());
             }
         });
-        return mVenueItems;
     }
 
     public LiveData<Venue> loadVenueDetailsById(String id){
@@ -95,5 +106,9 @@ public class VenueRepository {
             }
         });
         return photosResponseMutableLiveData;
+    }
+
+    public int getTotalResults() {
+        return totalResults;
     }
 }

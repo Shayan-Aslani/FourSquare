@@ -1,5 +1,6 @@
 package com.shayanaslani.foursquareexample.network;
 
+import com.shayanaslani.foursquareexample.model.VenueListResponse;
 import com.shayanaslani.foursquareexample.model.VenuePhotoItem;
 import com.shayanaslani.foursquareexample.model.Venue;
 
@@ -13,7 +14,7 @@ import retrofit2.http.Query;
 public interface FoursquareService {
 
     @GET("explore")
-    Call<List<Venue>> loadFromApi(@Query("ll") String latLng);
+    Call<VenueListResponse> loadFromApi(@Query("ll") String latLng , @Query("offset") int offset);
 
     @GET("{id}")
     Call<Venue> loadDetailsFromApi(@Path("id") String venueId);
