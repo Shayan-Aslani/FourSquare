@@ -5,7 +5,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.text.style.BackgroundColorSpan;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.shayanaslani.foursquareexample.R;
 import com.shayanaslani.foursquareexample.databinding.ItemVenueListBinding;
+import com.shayanaslani.foursquareexample.databinding.ItemVenueLoadingBinding;
 import com.shayanaslani.foursquareexample.eventbus.OnVenueClickedMessage;
 import com.shayanaslani.foursquareexample.model.Venue;
 import com.squareup.picasso.Picasso;
@@ -26,7 +29,10 @@ import java.util.List;
 import static java.security.AccessController.getContext;
 
 
-public class VenueAdapter extends RecyclerView.Adapter<VenueAdapter.VenueHolder> {
+public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private final int VIEW_TYPE_ITEM = 0;
+    private final int VIEW_TYPE_LOADING = 1;
 
     private List<Venue> venueList;
     private Context mContext;
@@ -42,23 +48,36 @@ public class VenueAdapter extends RecyclerView.Adapter<VenueAdapter.VenueHolder>
 
     @NonNull
     @Override
-    public VenueHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Activity activity = (Activity) parent.getContext();
-        ItemVenueListBinding binding = DataBindingUtil.inflate(activity.getLayoutInflater(),
-                R.layout.item_venue_list, parent, false);
 
-        return new VenueHolder(binding);
+        if(viewType == VIEW_TYPE_ITEM) {
+            ItemVenueListBinding binding = DataBindingUtil.inflate(activity.getLayoutInflater(),
+                    R.layout.item_venue_list, parent, false);
+            return new VenueHolder(binding);
+        }
+        else {
+                ItemVenueLoadingBinding loadingBinding = DataBindingUtil.inflate(activity.getLayoutInflater() ,
+                        R.layout.item_venue_loading , parent , false);
+                return new LoadingViewHolder(loadingBinding);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VenueHolder holder, int position) {
-        Venue items = venueList.get(position);
-        holder.bind(items);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof VenueHolder)
+            ((VenueHolder) holder).bind((venueList.get(position)));
+
     }
 
     @Override
     public int getItemCount() {
-        return venueList == null ? 0 : venueList.size();
+        return venueList == null ? 0 : venueList.size()+1;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position == venueList.size()  ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }
 
     public class VenueHolder extends RecyclerView.ViewHolder {
@@ -82,6 +101,12 @@ public class VenueAdapter extends RecyclerView.Adapter<VenueAdapter.VenueHolder>
             itemView.setOnClickListener(view -> {
                 EventBus.getDefault().post(new OnVenueClickedMessage(mVenue.getId()));
             });
+        }
+    }
+
+    private class LoadingViewHolder extends RecyclerView.ViewHolder {
+        public LoadingViewHolder(@NonNull ItemVenueLoadingBinding binding) {
+            super(binding.getRoot());
         }
     }
 }
