@@ -29,8 +29,8 @@ public class RetrofitInstance {
     private static RetrofitInstance instance;
     private Retrofit mRetrofit;
 
-    private static final String CLIENT_ID = "AZMD15MKP0KSQ0K5CNBZNDZG3AFVQW24UJP5OWIJNACISLJ0";
-    private static final String CLIENT_SECRET = "3RL2U0RMG2M5RNGWG143125WX3PHYGWATXCQHG3GYK1W5BU2";
+    private static final String CLIENT_ID = "KTTXWN1GWGYFI3FIW4ZY4CQHZB2WFTQN010JDAAVDUWDUQ5Y";
+    private static final String CLIENT_SECRET = "0JC24S425NU40IQ1HABWGCMI5WW3B5V2LPKTP3PWREDE0RQ2";
     private static final String VERSION = "20200220";
     private static final String BASE_URL = "https://api.foursquare.com/v2/venues/";
 

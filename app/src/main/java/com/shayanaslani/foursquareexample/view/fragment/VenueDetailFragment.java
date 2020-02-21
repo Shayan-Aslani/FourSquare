@@ -1,10 +1,13 @@
 package com.shayanaslani.foursquareexample.view.fragment;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.GradientDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -29,6 +32,7 @@ import com.shayanaslani.foursquareexample.viewmodel.VenueDetailFragmentViewModel
 public class VenueDetailFragment extends Fragment {
 
     private static final String VENUE_DETAIL_ARG = "venueIdArg";
+    private String mVenueId ;
 
     private FragmentVenueDetailBinding mBinding;
     private VenueDetailFragmentViewModel mViewModel;
@@ -50,14 +54,21 @@ public class VenueDetailFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = ViewModelProviders.of(this).get(VenueDetailFragmentViewModel.class);
-        mViewModel.loadVenueDetailFromApi(getArguments().getString(VENUE_DETAIL_ARG));
-        mViewModel.loadVenuePhotosFromApi(getArguments().getString(VENUE_DETAIL_ARG), "10");
+        mVenueId = getArguments().getString(VENUE_DETAIL_ARG);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_venue_detail, container, false);
+
+        if (isNetworkAvailable()) {
+            loadVenueDetailFromApi(mVenueId);
+        }
+        else
+        {
+            onNetworkUnavailable();
+        }
 
         mBinding.venueDetailScrollview.setVisibility(View.GONE);
 
@@ -80,7 +91,8 @@ public class VenueDetailFragment extends Fragment {
 
     private void setObservers(){
         mViewModel.getVenueLiveData().observe(getActivity(), venue -> {
-
+//            if(isNetworkAvailable())
+//                mViewModel.saveToDB();
             mBinding.veuneDetailProgressbar.setVisibility(View.GONE);
             mBinding.venueDetailScrollview.setVisibility(View.VISIBLE);
             mBinding.venueDetailTv.setText(venue.getName());
@@ -94,8 +106,34 @@ public class VenueDetailFragment extends Fragment {
                 mBinding.venueDetailTipsTv.setText(mViewModel.getVenueTips());
         });
 
+        mBinding.venueDetailTryAgainBtn.setOnClickListener(view -> {
+            if(isNetworkAvailable())
+                loadVenueDetailFromApi(mVenueId);
+        });
+
         mViewModel.getVeunePhotos().observe(getActivity(), items -> {
             mBinding.venueDetailImageSlider.setSliderAdapter(new ImageSliderAdapter(getContext(), items));
         });
+    }
+
+    private void onNetworkUnavailable(){
+        mBinding.venueDetailTryAgainBtn.setVisibility(View.VISIBLE);
+        mBinding.networkFailTv.setVisibility(View.VISIBLE);
+        mBinding.veuneDetailProgressbar.setVisibility(View.GONE);
+    }
+
+    private void loadVenueDetailFromApi(String venueId){
+        mBinding.venueDetailTryAgainBtn.setVisibility(View.GONE);
+        mBinding.veuneDetailProgressbar.setVisibility(View.VISIBLE);
+        mBinding.networkFailTv.setVisibility(View.GONE);
+        mViewModel.loadVenueDetailFromApi(venueId);
+        mViewModel.loadVenuePhotosFromApi(venueId, "10");
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

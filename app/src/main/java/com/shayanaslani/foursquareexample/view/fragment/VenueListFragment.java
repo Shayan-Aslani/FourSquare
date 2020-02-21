@@ -76,12 +76,13 @@ public class VenueListFragment extends Fragment {
             requestPermission();
         if (!isLocationEnabled())
             requestLocationAccess();
-
         if (isLocationEnabled() && checkPermissions() && isNetworkAvailable()) {
             requestNewLocationData();
         }
-        if(!isNetworkAvailable())
+        if(!isNetworkAvailable()) {
             mViewModel.loadVenuesFromDB();
+            Toast.makeText(getContext(), "network is unavailable ! information is not up to date", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

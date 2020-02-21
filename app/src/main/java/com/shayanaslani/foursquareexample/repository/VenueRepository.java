@@ -2,6 +2,7 @@ package com.shayanaslani.foursquareexample.repository;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
@@ -32,6 +33,12 @@ public class VenueRepository {
     private RoomDB roomDB ;
 
     private MutableLiveData<List<Venue>> mVenueItems = new MutableLiveData<>();
+
+    public MutableLiveData<Venue> getVenue() {
+        return mVenue;
+    }
+
+    private MutableLiveData<Venue> mVenue = new MutableLiveData<>();
     private int totalResults = 0 ;
 
     public static VenueRepository getInstance(Context context){
@@ -58,13 +65,22 @@ public class VenueRepository {
         roomDB.venueDao().insertVenueList(venueList);
     }
 
-    public void loadVenuesFromDB()
-    {
+    public void loadVenuesFromDB() {
         mVenueItems.postValue(roomDB.venueDao().getAllVenues());
+    }
+
+    public Venue loadVenueFromDB(String venueId){
+        return roomDB.venueDao().getVenueById(venueId);
     }
 
     public void clearDB(){
         roomDB.venueDao().clearVenues();
+    }
+
+    public void updateVenue(Venue venue){
+        Venue venue1 = roomDB.venueDao().getVenueById(venue.getId()) ;
+        venue.setRoomId(venue1.getRoomId());
+        roomDB.venueDao().update(venue);
     }
 
     public void loadVenuesFromApi(LatLng latLng , int offset , boolean newLatLng){
@@ -96,14 +112,13 @@ public class VenueRepository {
     }
 
 
-    public LiveData<Venue> loadVenueDetailsById(String id){
-        MutableLiveData<Venue> venueMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<Venue> loadVenueDetailsById(String id){
         RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadDetailsFromApi(id).
                 enqueue(new Callback<Venue>() {
                     @Override
                     public void onResponse(Call<Venue> call, Response<Venue> response) {
                         if(response.isSuccessful()){
-                            venueMutableLiveData.postValue(response.body());
+                            mVenue.postValue(response.body());
                         }
                     }
                     @Override
@@ -111,7 +126,7 @@ public class VenueRepository {
                         Log.d(NETWORK_TAG , t.getMessage());
                     }
                 });
-        return venueMutableLiveData;
+        return mVenue ;
     }
 
     public LiveData<List<VenuePhotoItem>> loadVenuePhotos(String id , String limit){

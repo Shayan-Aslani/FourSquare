@@ -2,7 +2,6 @@ package com.shayanaslani.foursquareexample.viewmodel;
 
 import android.app.Application;
 import android.content.Context;
-import android.graphics.Color;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -19,14 +18,14 @@ public class VenueDetailFragmentViewModel extends AndroidViewModel {
 
     private VenueRepository mRepository ;
     private Context mContext ;
-    private LiveData<Venue> mVenue ;
+    private MutableLiveData<Venue> mVenue ;
     private LiveData<List<VenuePhotoItem>> mPhotos ;
 
     public VenueDetailFragmentViewModel(@NonNull Application application) {
         super(application);
         mContext = application;
         mRepository = VenueRepository.getInstance(application);
-        mVenue = new MutableLiveData<>();
+        mVenue = mRepository.getVenue();
         mPhotos = new MutableLiveData<>();
     }
 
@@ -35,7 +34,7 @@ public class VenueDetailFragmentViewModel extends AndroidViewModel {
     }
 
     public void loadVenueDetailFromApi(String id){
-        mVenue = mRepository.loadVenueDetailsById(id);
+        mRepository.loadVenueDetailsById(id);
     }
 
     public LiveData<List<VenuePhotoItem>> getVeunePhotos(){
@@ -50,5 +49,13 @@ public class VenueDetailFragmentViewModel extends AndroidViewModel {
         if(mVenue.getValue().getTips().getCount()!=0)
             return mVenue.getValue().getTips().getGroups().get(0).getItems().get(0).getText();
         return null;
+    }
+
+    public void saveToDB(){
+        mRepository.updateVenue(mVenue.getValue());
+    }
+
+    public void loadVenueDetailFromDB(String id){
+        mVenue.postValue(mRepository.loadVenueFromDB(id));
     }
 }
