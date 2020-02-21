@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.shayanaslani.foursquareexample.database.RoomDB;
 import com.shayanaslani.foursquareexample.model.VenueListResponse;
 import com.shayanaslani.foursquareexample.model.VenuePhotoItem;
 import com.shayanaslani.foursquareexample.model.Venue;
@@ -28,6 +29,8 @@ public class VenueRepository {
     private static VenueRepository mInstance ;
     private Context mContext ;
 
+    private RoomDB roomDB ;
+
     private MutableLiveData<List<Venue>> mVenueItems = new MutableLiveData<>();
     private int totalResults = 0 ;
 
@@ -40,6 +43,7 @@ public class VenueRepository {
     private VenueRepository(Context context) {
         mContext = context;
         mVenueItems.postValue(new ArrayList<>());
+        roomDB = RoomDB.getInstance(mContext);
     }
 
     public MutableLiveData<List<Venue>> getVenueItems() {
@@ -55,6 +59,7 @@ public class VenueRepository {
                 enqueue(new Callback<VenueListResponse>() {
             @Override
             public void onResponse(Call<VenueListResponse> call, Response<VenueListResponse> response) {
+
                 if(response.isSuccessful()) {
                     List<Venue> list = mVenueItems.getValue();
                     list.addAll(response.body().getVenueList());
@@ -69,6 +74,7 @@ public class VenueRepository {
             }
         });
     }
+
 
     public LiveData<Venue> loadVenueDetailsById(String id){
         MutableLiveData<Venue> venueMutableLiveData = new MutableLiveData<>();

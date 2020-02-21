@@ -1,36 +1,48 @@
 
 package com.shayanaslani.foursquareexample.model;
 
+import androidx.room.Embedded;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.shayanaslani.foursquareexample.database.FoursquareTypeConverters;
 
 import java.util.List;
 
+@Entity(tableName = "venue")
+@TypeConverters(FoursquareTypeConverters.class)
 public class Venue {
-    @Expose
+    @PrimaryKey(autoGenerate = true)
+    private int roomId;
+    @Ignore
     @SerializedName("photos")
     private Photos photos;
-    @Expose
+    @Embedded
     @SerializedName("location")
     private Location location;
-    @Expose
     @SerializedName("categories")
     private List<Categories> categories;
-    @Expose
+    @Ignore
     @SerializedName("contact")
     private Contact contact;
-    @Expose
     @SerializedName("name")
     private String name;
-    @Expose
     @SerializedName("id")
     private String id;
-
+    @Ignore
     @SerializedName("likes")
-    private Likes likes ;
-
+    private Likes likes;
+    @Ignore
     @SerializedName("tips")
-    private Tips tips ;
+    private Tips tips;
+    @SerializedName("rating")
+    private String rating;
+    @SerializedName("ratingColor")
+    private String ratingColor;
 
     public Tips getTips() {
         return tips;
@@ -56,11 +68,6 @@ public class Venue {
         this.ratingColor = ratingColor;
     }
 
-    @SerializedName("rating")
-    private String rating ;
-    @SerializedName("ratingColor")
-    private String ratingColor;
-
     public Likes getLikes() {
         return likes;
     }
@@ -68,7 +75,6 @@ public class Venue {
     public void setLikes(Likes likes) {
         this.likes = likes;
     }
-
 
     public Photos getPhotos() {
         return photos;
@@ -118,11 +124,17 @@ public class Venue {
         this.categories = categories;
     }
 
+    public int getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
+    }
+
     public static class Photos {
-        @Expose
         @SerializedName("groups")
         private List<Groups> groups;
-        @Expose
         @SerializedName("count")
         private int count;
 
@@ -144,6 +156,7 @@ public class Venue {
     }
 
     public static class Groups {
+
         @Expose
         @SerializedName("items")
         private List<PhotoItems> items;
@@ -281,31 +294,6 @@ public class Venue {
         }
     }
 
-    public static class Photo {
-        @Expose
-        @SerializedName("suffix")
-        private String suffix;
-        @Expose
-        @SerializedName("prefix")
-        private String prefix;
-
-        public String getSuffix() {
-            return suffix;
-        }
-
-        public void setSuffix(String suffix) {
-            this.suffix = suffix;
-        }
-
-        public String getPrefix() {
-            return prefix;
-        }
-
-        public void setPrefix(String prefix) {
-            this.prefix = prefix;
-        }
-    }
-
     public static class Source {
         @Expose
         @SerializedName("url")
@@ -332,34 +320,37 @@ public class Venue {
     }
 
     public static class Location {
-        @Expose
+        public Location() {
+        }
+
+        @Ignore
         @SerializedName("formattedAddress")
         private List<String> formattedAddress;
-        @Expose
+        @Ignore
         @SerializedName("country")
         private String country;
-        @Expose
+        @Ignore
         @SerializedName("state")
         private String state;
-        @Expose
+        @Ignore
         @SerializedName("city")
         private String city;
-        @Expose
+        @Ignore
         @SerializedName("cc")
         private String cc;
-        @Expose
+        @Ignore
         @SerializedName("labeledLatLngs")
         private List<LabeledLatLngs> labeledLatLngs;
-        @Expose
+        @Ignore
         @SerializedName("lng")
         private double lng;
-        @Expose
+        @Ignore
         @SerializedName("lat")
         private double lat;
-        @Expose
+        @Ignore
         @SerializedName("crossStreet")
         private String crossStreet;
-        @Expose
+        @Ignore
         @SerializedName("address")
         private String address;
         @SerializedName("distance")
@@ -456,6 +447,9 @@ public class Venue {
     }
 
     public static class LabeledLatLngs {
+        public LabeledLatLngs() {
+        }
+
         @Expose
         @SerializedName("lng")
         private double lng;
@@ -528,22 +522,16 @@ public class Venue {
     }
 
     public static class Categories {
-        @Expose
         @SerializedName("primary")
         private boolean primary;
-        @Expose
         @SerializedName("icon")
         private Icon icon;
-        @Expose
         @SerializedName("shortName")
         private String shortName;
-        @Expose
         @SerializedName("pluralName")
         private String pluralName;
-        @Expose
         @SerializedName("name")
         private String name;
-        @Expose
         @SerializedName("id")
         private String id;
 
@@ -597,10 +585,8 @@ public class Venue {
     }
 
     public static class Icon {
-        @Expose
         @SerializedName("suffix")
         private String suffix;
-        @Expose
         @SerializedName("prefix")
         private String prefix;
 
@@ -622,10 +608,8 @@ public class Venue {
     }
 
     public static class Likes {
-        @Expose
         @SerializedName("summary")
         private String summary;
-        @Expose
         @SerializedName("count")
         private int count;
 
@@ -647,11 +631,8 @@ public class Venue {
     }
 
     public static class Tips {
-
-        @Expose
         @SerializedName("groups")
         private List<Groups> groups;
-        @Expose
         @SerializedName("count")
         private int count;
 
@@ -726,9 +707,6 @@ public class Venue {
             @SerializedName("user")
             private User user;
             @Expose
-            @SerializedName("todo")
-            private Todo todo;
-            @Expose
             @SerializedName("disagreeCount")
             private int disagreeCount;
             @Expose
@@ -770,14 +748,6 @@ public class Venue {
 
             public void setUser(User user) {
                 this.user = user;
-            }
-
-            public Todo getTodo() {
-                return todo;
-            }
-
-            public void setTodo(Todo todo) {
-                this.todo = todo;
             }
 
             public int getDisagreeCount() {
@@ -854,6 +824,9 @@ public class Venue {
         }
 
         public static class User {
+            public User() {
+            }
+
             @Expose
             @SerializedName("photo")
             private Photo photo;
@@ -901,6 +874,9 @@ public class Venue {
         }
 
         public static class Photo {
+            public Photo() {
+            }
+
             @Expose
             @SerializedName("suffix")
             private String suffix;
@@ -922,45 +898,6 @@ public class Venue {
 
             public void setPrefix(String prefix) {
                 this.prefix = prefix;
-            }
-        }
-
-        public static class Todo {
-            @Expose
-            @SerializedName("count")
-            private int count;
-
-            public int getCount() {
-                return count;
-            }
-
-            public void setCount(int count) {
-                this.count = count;
-            }
-        }
-
-        public static class Likes {
-            @Expose
-            @SerializedName("groups")
-            private List<String> groups;
-            @Expose
-            @SerializedName("count")
-            private int count;
-
-            public List<String> getGroups() {
-                return groups;
-            }
-
-            public void setGroups(List<String> groups) {
-                this.groups = groups;
-            }
-
-            public int getCount() {
-                return count;
-            }
-
-            public void setCount(int count) {
-                this.count = count;
             }
         }
     }
