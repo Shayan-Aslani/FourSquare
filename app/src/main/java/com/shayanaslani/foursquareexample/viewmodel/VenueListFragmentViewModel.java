@@ -51,4 +51,8 @@ public class VenueListFragmentViewModel extends AndroidViewModel {
             return true;
         return false;
     }
+
+    public void loadVenuesFromDB(){
+        mRepository.loadVenuesFromDB();
+    }
 }

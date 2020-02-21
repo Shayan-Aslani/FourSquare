@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -70,15 +72,16 @@ public class VenueListFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = ViewModelProviders.of(getActivity()).get(VenueListFragmentViewModel.class);
-        if (!checkPermissions()) {
+        if (!checkPermissions())
             requestPermission();
-        }
-        if (!isLocationEnabled()) {
+        if (!isLocationEnabled())
             requestLocationAccess();
-        }
-        if (isLocationEnabled() && checkPermissions()) {
+
+        if (isLocationEnabled() && checkPermissions() && isNetworkAvailable()) {
             requestNewLocationData();
         }
+        if(!isNetworkAvailable())
+            mViewModel.loadVenuesFromDB();
     }
 
     @Override
@@ -123,7 +126,13 @@ public class VenueListFragment extends Fragment {
             venueAdapter.setVenueList(items);
         });
 
-        mBinding.venueListLocationFab.setOnClickListener(view -> requestNewLocationData());
+
+        mBinding.venueListLocationFab.setOnClickListener(view -> {
+            if (isNetworkAvailable())
+                requestNewLocationData();
+            else
+                Toast.makeText(getContext(), "network is unavailable , connect to network to update list", Toast.LENGTH_SHORT).show();
+        });
 
         return mBinding.getRoot();
     }
@@ -150,6 +159,7 @@ public class VenueListFragment extends Fragment {
                         && !mViewModel.isLastItem()) {
                     mViewModel.loadVenueListFromApi(null, false);
                     venueAdapter.setIsLastPage(mViewModel.isLastItem());
+
                 }
             }
         });
@@ -237,5 +247,12 @@ public class VenueListFragment extends Fragment {
         criteria.setSpeedRequired(false);
         String bestProvider = locationManager.getBestProvider(criteria, false);
         locationManager.requestLocationUpdates(bestProvider, minTime, minDistance, locationListener);
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

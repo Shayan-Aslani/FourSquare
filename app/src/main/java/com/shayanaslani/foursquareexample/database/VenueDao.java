@@ -16,7 +16,9 @@ public interface VenueDao {
     @Query("SELECT * FROM venue")
     List<Venue> getAllVenues();
     @Insert()
-    void insert(List<Venue> venue);
+    void insertVenueList(List<Venue> venue);
+    @Insert()
+    void insertVenue(Venue venue);
     @Query("DELETE FROM venue")
-    void clear();
+    void clearVenues();
 }

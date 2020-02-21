@@ -61,6 +61,7 @@ public class VenueDetailFragment extends Fragment {
 
         mBinding.venueDetailScrollview.setVisibility(View.GONE);
 
+        setObservers();
 
         /*
             Uri gmmIntentUri = Uri.parse("geo:"+mViewModel.getVenueLiveData().getValue().getLocation().getLat() +

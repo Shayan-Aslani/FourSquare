@@ -50,11 +50,30 @@ public class VenueRepository {
         return mVenueItems;
     }
 
+    public void insertVenue(Venue venue){
+        roomDB.venueDao().insertVenue(venue);
+    }
+
+    public void insertVenueList(List<Venue> venueList){
+        roomDB.venueDao().insertVenueList(venueList);
+    }
+
+    public void loadVenuesFromDB()
+    {
+        mVenueItems.postValue(roomDB.venueDao().getAllVenues());
+    }
+
+    public void clearDB(){
+        roomDB.venueDao().clearVenues();
+    }
+
     public void loadVenuesFromApi(LatLng latLng , int offset , boolean newLatLng){
         String latLngString = latLng.latitude + "," + latLng.longitude ;
 
-        if(newLatLng)
+        if(newLatLng) {
             mVenueItems.setValue(new ArrayList<>());
+            clearDB();
+        }
         RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadFromApi(latLngString , offset).
                 enqueue(new Callback<VenueListResponse>() {
             @Override
@@ -64,6 +83,7 @@ public class VenueRepository {
                     List<Venue> list = mVenueItems.getValue();
                     list.addAll(response.body().getVenueList());
                     mVenueItems.postValue(list);
+                    insertVenueList(response.body().getVenueList());
                     totalResults = response.body().getTotalResults();
                 }
             }
