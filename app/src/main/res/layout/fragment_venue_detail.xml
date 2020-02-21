@@ -8,6 +8,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <TextView
+                android:id="@+id/network_fail_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="No Network Connection !"
+                android:textSize="16sp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/venue_detail_try_again_btn"
+                app:layout_constraintEnd_toEndOf="@+id/venue_detail_try_again_btn"
+                app:layout_constraintStart_toStartOf="@+id/venue_detail_try_again_btn" />
+
             <ProgressBar
                 android:id="@+id/veune_detail_progressbar"
                 style="?android:attr/progressBarStyle"
@@ -73,12 +85,13 @@
                     android:layout_height="674dp"
                     android:layout_below="@+id/venue_detail_toolbar">
 
+
                     <com.smarteist.autoimageslider.SliderView
                         android:id="@+id/venue_detail_image_slider"
                         android:layout_width="0dp"
                         android:layout_height="400dp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:sliderIndicatorGravity="center_horizontal|bottom"
@@ -90,7 +103,6 @@
                         app:sliderIndicatorUnselectedColor="#FFF">
 
                     </com.smarteist.autoimageslider.SliderView>
-
 
                     <TextView
                         android:id="@+id/venue_detail_tv"

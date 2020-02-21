@@ -2,12 +2,14 @@ package com.shayanaslani.foursquareexample.repository;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.shayanaslani.foursquareexample.database.RoomDB;
 import com.shayanaslani.foursquareexample.model.VenueListResponse;
 import com.shayanaslani.foursquareexample.model.VenuePhotoItem;
 import com.shayanaslani.foursquareexample.model.Venue;
@@ -28,7 +30,15 @@ public class VenueRepository {
     private static VenueRepository mInstance ;
     private Context mContext ;
 
+    private RoomDB roomDB ;
+
     private MutableLiveData<List<Venue>> mVenueItems = new MutableLiveData<>();
+
+    public MutableLiveData<Venue> getVenue() {
+        return mVenue;
+    }
+
+    private MutableLiveData<Venue> mVenue = new MutableLiveData<>();
     private int totalResults = 0 ;
 
     public static VenueRepository getInstance(Context context){
@@ -40,25 +50,56 @@ public class VenueRepository {
     private VenueRepository(Context context) {
         mContext = context;
         mVenueItems.postValue(new ArrayList<>());
+        roomDB = RoomDB.getInstance(mContext);
     }
 
     public MutableLiveData<List<Venue>> getVenueItems() {
         return mVenueItems;
     }
 
+    public void insertVenue(Venue venue){
+        roomDB.venueDao().insertVenue(venue);
+    }
+
+    public void insertVenueList(List<Venue> venueList){
+        roomDB.venueDao().insertVenueList(venueList);
+    }
+
+    public void loadVenuesFromDB() {
+        mVenueItems.postValue(roomDB.venueDao().getAllVenues());
+    }
+
+    public Venue loadVenueFromDB(String venueId){
+        return roomDB.venueDao().getVenueById(venueId);
+    }
+
+    public void clearDB(){
+        roomDB.venueDao().clearVenues();
+    }
+
+    public void updateVenue(Venue venue){
+        Venue venue1 = roomDB.venueDao().getVenueById(venue.getId()) ;
+        venue.setRoomId(venue1.getRoomId());
+        roomDB.venueDao().update(venue);
+    }
+
     public void loadVenuesFromApi(LatLng latLng , int offset , boolean newLatLng){
         String latLngString = latLng.latitude + "," + latLng.longitude ;
 
-        if(newLatLng)
+        if(newLatLng) {
             mVenueItems.setValue(new ArrayList<>());
+            clearDB();
+        }
         RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadFromApi(latLngString , offset).
                 enqueue(new Callback<VenueListResponse>() {
             @Override
             public void onResponse(Call<VenueListResponse> call, Response<VenueListResponse> response) {
+
                 if(response.isSuccessful()) {
                     List<Venue> list = mVenueItems.getValue();
                     list.addAll(response.body().getVenueList());
                     mVenueItems.postValue(list);
+                    insertVenueList(response.body().getVenueList());
                     totalResults = response.body().getTotalResults();
                 }
             }
@@ -70,14 +111,14 @@ public class VenueRepository {
         });
     }
 
-    public LiveData<Venue> loadVenueDetailsById(String id){
-        MutableLiveData<Venue> venueMutableLiveData = new MutableLiveData<>();
+
+    public MutableLiveData<Venue> loadVenueDetailsById(String id){
         RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadDetailsFromApi(id).
                 enqueue(new Callback<Venue>() {
                     @Override
                     public void onResponse(Call<Venue> call, Response<Venue> response) {
                         if(response.isSuccessful()){
-                            venueMutableLiveData.postValue(response.body());
+                            mVenue.postValue(response.body());
                         }
                     }
                     @Override
@@ -85,7 +126,7 @@ public class VenueRepository {
                         Log.d(NETWORK_TAG , t.getMessage());
                     }
                 });
-        return venueMutableLiveData;
+        return mVenue ;
     }
 
     public LiveData<List<VenuePhotoItem>> loadVenuePhotos(String id , String limit){
