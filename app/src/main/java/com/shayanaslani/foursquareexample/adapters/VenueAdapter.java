@@ -26,7 +26,7 @@ public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
 
-    private boolean isLastPage = false ;
+    private boolean isLastPage = true ;
 
     private List<Venue> venueList;
     private Context mContext;
@@ -41,7 +41,7 @@ public class VenueAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
 
-    public void setIsLastPage(boolean isLastPage) {
+    public void setIsLastItem(boolean isLastPage) {
         this.isLastPage = isLastPage;
         notifyDataSetChanged();
     }

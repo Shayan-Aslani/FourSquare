@@ -3,4 +3,20 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="request_permissions">You need to allow access to both the permissions</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="network_unavailable">network is unavailable , connect to network to update list</string>
+    <string name="need_location">You need to turn on location to update data</string>
+    <string name="turn_on">Turn on</string>
+    <string name="offline_mode">network is unavailable ! information is not up to date</string>
+    <string name="permission_granted">permission granted</string>
+    <string name="quota_exceeded">Quota exceeded</string>
+    <string name="network_failure">Network Failure !</string>
+    <string name="show_in_map">SHOW IN MAP</string>
+    <string name="no_network_connection">No Network Connection !</string>
+    <string name="try_again">try again</string>
+    <string name="tips">Tips</string>
+    <string name="likes">Likes</string>
+    <string name="todo">TODO</string>
 </resources>

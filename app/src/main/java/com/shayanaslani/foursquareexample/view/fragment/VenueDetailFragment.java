@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import com.shayanaslani.foursquareexample.R;
 import com.shayanaslani.foursquareexample.adapters.ImageSliderAdapter;
 import com.shayanaslani.foursquareexample.databinding.FragmentVenueDetailBinding;
+import com.shayanaslani.foursquareexample.util.Utils;
 import com.shayanaslani.foursquareexample.viewmodel.VenueDetailFragmentViewModel;
 
 
@@ -32,7 +33,7 @@ import com.shayanaslani.foursquareexample.viewmodel.VenueDetailFragmentViewModel
 public class VenueDetailFragment extends Fragment {
 
     private static final String VENUE_DETAIL_ARG = "venueIdArg";
-    private String mVenueId ;
+    private String mVenueId;
 
     private FragmentVenueDetailBinding mBinding;
     private VenueDetailFragmentViewModel mViewModel;
@@ -62,78 +63,77 @@ public class VenueDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_venue_detail, container, false);
 
-        if (isNetworkAvailable()) {
+        setObservers();
+        setOnClickListeners();
+
+        if (Utils.isNetworkAvailable(getActivity()))
             loadVenueDetailFromApi(mVenueId);
-        }
         else
-        {
             onNetworkUnavailable();
-        }
 
         mBinding.venueDetailScrollview.setVisibility(View.GONE);
 
-        setObservers();
-
-        /*
-            Uri gmmIntentUri = Uri.parse("geo:"+mViewModel.getVenueLiveData().getValue().getLocation().getLat() +
-                    "," + mViewModel.getVenueLiveData().getValue().getLocation().getLng());
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-            mapIntent.setPackage("com.google.android.apps.maps");
-            if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                startActivity(mapIntent);
-            }
-
-         */
-
-        mBinding.venueDetailBackMenu.setOnClickListener(view -> getActivity().onBackPressed());
         return mBinding.getRoot();
     }
 
-    private void setObservers(){
-        mViewModel.getVenueLiveData().observe(getActivity(), venue -> {
+    private void setObservers() {
+        mViewModel.getVenueLiveData().observe(this, venue -> {
 //            if(isNetworkAvailable())
 //                mViewModel.saveToDB();
             mBinding.veuneDetailProgressbar.setVisibility(View.GONE);
             mBinding.venueDetailScrollview.setVisibility(View.VISIBLE);
+            mBinding.showMapTv.setVisibility(View.VISIBLE);
             mBinding.venueDetailTv.setText(venue.getName());
-            mBinding.venueDetailLikeTv.setText(String.valueOf(venue.getLikes().getCount()));
-            mBinding.veuneDetailProgressbar.setVisibility(View.GONE);
-            mBinding.venueDetailScrollview.setVisibility(View.VISIBLE);
-            mBinding.venueDetailRateTv.setText(venue.getRating());
-            ((GradientDrawable)mBinding.venueDetailRateTv.getBackground())
-                    .setColor(Color.parseColor("#" + venue.getRatingColor()));
-            if(mViewModel.getVenueTips() != null)
+            if (venue.getLikes() != null)
+                mBinding.venueDetailLikeTv.setText(String.valueOf(venue.getLikes().getCount()));
+            if(venue.getRating() != null) {
+                mBinding.venueDetailRateTv.setText(venue.getRating());
+                ((GradientDrawable) mBinding.venueDetailRateTv.getBackground())
+                        .setColor(Color.parseColor("#" + venue.getRatingColor()));
+            }
+            else
+                mBinding.venueDetailRateTv.setVisibility(View.INVISIBLE);
+            if (mViewModel.getVenueTips() != null)
                 mBinding.venueDetailTipsTv.setText(mViewModel.getVenueTips());
         });
 
-        mBinding.venueDetailTryAgainBtn.setOnClickListener(view -> {
-            if(isNetworkAvailable())
-                loadVenueDetailFromApi(mVenueId);
-        });
-
-        mViewModel.getVeunePhotos().observe(getActivity(), items -> {
-            mBinding.venueDetailImageSlider.setSliderAdapter(new ImageSliderAdapter(getContext(), items));
+        mViewModel.getVeunePhotos().observe(this, items -> {
+            if(items.size() != 0) {
+                mBinding.venueDetailImageSlider.setVisibility(View.VISIBLE);
+                mBinding.venueDetailImageSlider.setSliderAdapter(new ImageSliderAdapter(getContext(), items));
+            }
         });
     }
 
-    private void onNetworkUnavailable(){
+    private void setOnClickListeners() {
+        mBinding.showMapTv.setOnClickListener(view -> {
+            Uri gmmIntentUri = Uri.parse("geo:0,0" + "?q=" + mViewModel.getVenueLiveData().getValue().getLocation().getLat() +
+                    "," + mViewModel.getVenueLiveData().getValue().getLocation().getLng() + "(label)");
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivity(mapIntent);
+            }
+        });
+
+        mBinding.venueDetailBackMenu.setOnClickListener(view -> getActivity().onBackPressed());
+
+        mBinding.venueDetailTryAgainBtn.setOnClickListener(view -> {
+            if (Utils.isNetworkAvailable(getActivity()))
+                loadVenueDetailFromApi(mVenueId);
+        });
+    }
+
+    private void onNetworkUnavailable() {
         mBinding.venueDetailTryAgainBtn.setVisibility(View.VISIBLE);
         mBinding.networkFailTv.setVisibility(View.VISIBLE);
         mBinding.veuneDetailProgressbar.setVisibility(View.GONE);
     }
 
-    private void loadVenueDetailFromApi(String venueId){
+    private void loadVenueDetailFromApi(String venueId) {
         mBinding.venueDetailTryAgainBtn.setVisibility(View.GONE);
         mBinding.veuneDetailProgressbar.setVisibility(View.VISIBLE);
         mBinding.networkFailTv.setVisibility(View.GONE);
         mViewModel.loadVenueDetailFromApi(venueId);
         mViewModel.loadVenuePhotosFromApi(venueId, "10");
-    }
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

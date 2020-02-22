@@ -1,6 +1,7 @@
 package com.shayanaslani.foursquareexample.repository;
 
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.Toast;
@@ -9,15 +10,18 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.shayanaslani.foursquareexample.R;
 import com.shayanaslani.foursquareexample.database.RoomDB;
 import com.shayanaslani.foursquareexample.model.VenueListResponse;
 import com.shayanaslani.foursquareexample.model.VenuePhotoItem;
 import com.shayanaslani.foursquareexample.model.Venue;
 import com.shayanaslani.foursquareexample.network.FoursquareService;
 import com.shayanaslani.foursquareexample.network.RetrofitInstance;
+import com.shayanaslani.foursquareexample.util.Preferences;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,12 +37,9 @@ public class VenueRepository {
     private RoomDB roomDB ;
 
     private MutableLiveData<List<Venue>> mVenueItems = new MutableLiveData<>();
-
-    public MutableLiveData<Venue> getVenue() {
-        return mVenue;
-    }
-
     private MutableLiveData<Venue> mVenue = new MutableLiveData<>();
+    private MutableLiveData<List<VenuePhotoItem>> photosResponseMutableLiveData = new MutableLiveData<>();
+
     private int totalResults = 0 ;
 
     public static VenueRepository getInstance(Context context){
@@ -55,6 +56,14 @@ public class VenueRepository {
 
     public MutableLiveData<List<Venue>> getVenueItems() {
         return mVenueItems;
+    }
+
+    public MutableLiveData<Venue> getVenue() {
+        return mVenue;
+    }
+
+    public MutableLiveData<List<VenuePhotoItem>> getPhotosResponseMutableLiveData() {
+        return photosResponseMutableLiveData;
     }
 
     public void insertVenue(Venue venue){
@@ -84,8 +93,9 @@ public class VenueRepository {
     }
 
     public void loadVenuesFromApi(LatLng latLng , int offset , boolean newLatLng){
+        if(latLng == null)
+            return;
         String latLngString = latLng.latitude + "," + latLng.longitude ;
-
         if(newLatLng) {
             mVenueItems.setValue(new ArrayList<>());
             clearDB();
@@ -106,13 +116,13 @@ public class VenueRepository {
 
             @Override
             public void onFailure(Call<VenueListResponse> call, Throwable t) {
+                Toast.makeText(mContext, R.string.network_failure, Toast.LENGTH_SHORT).show();
                 Log.d(NETWORK_TAG , t.getMessage());
             }
         });
     }
 
-
-    public MutableLiveData<Venue> loadVenueDetailsById(String id){
+    public void loadVenueDetailsById(String id){
         RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadDetailsFromApi(id).
                 enqueue(new Callback<Venue>() {
                     @Override
@@ -123,14 +133,14 @@ public class VenueRepository {
                     }
                     @Override
                     public void onFailure(Call<Venue> call, Throwable t) {
+                        Toast.makeText(mContext, R.string.network_failure, Toast.LENGTH_SHORT).show();
                         Log.d(NETWORK_TAG , t.getMessage());
                     }
                 });
-        return mVenue ;
     }
 
-    public LiveData<List<VenuePhotoItem>> loadVenuePhotos(String id , String limit){
-        MutableLiveData<List<VenuePhotoItem>> photosResponseMutableLiveData = new MutableLiveData<>();
+    public void loadVenuePhotos(String id , String limit){
+
         RetrofitInstance.getInstance().getRetrofit().create(FoursquareService.class).loadVenuePhotos(id , limit)
                 .enqueue(new Callback<List<VenuePhotoItem>>() {
             @Override
@@ -138,15 +148,23 @@ public class VenueRepository {
                 if(response.isSuccessful())
                     photosResponseMutableLiveData.postValue(response.body());
                 else if(response.raw().code() == 429)
-                    Toast.makeText(mContext, "Quota exceeded", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, R.string.quota_exceeded, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<List<VenuePhotoItem>> call, Throwable t) {
-                Log.d(NETWORK_TAG , t.getMessage());
+                Toast.makeText(mContext, R.string.network_failure, Toast.LENGTH_SHORT).show();
+                Log.d(NETWORK_TAG , Objects.requireNonNull(t.getMessage()));
             }
         });
-        return photosResponseMutableLiveData;
+    }
+
+    public void setLastLocation(LatLng latLng){
+        Preferences.setPrefLastLocation(mContext , latLng);
+    }
+
+    public LatLng getLastLocation(){
+        return Preferences.getPrefLastLocation(mContext);
     }
 
     public int getTotalResults() {

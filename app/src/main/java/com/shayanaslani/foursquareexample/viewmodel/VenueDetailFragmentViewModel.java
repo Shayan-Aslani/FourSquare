@@ -19,14 +19,14 @@ public class VenueDetailFragmentViewModel extends AndroidViewModel {
     private VenueRepository mRepository ;
     private Context mContext ;
     private MutableLiveData<Venue> mVenue ;
-    private LiveData<List<VenuePhotoItem>> mPhotos ;
+    private MutableLiveData<List<VenuePhotoItem>> mPhotos ;
 
     public VenueDetailFragmentViewModel(@NonNull Application application) {
         super(application);
         mContext = application;
         mRepository = VenueRepository.getInstance(application);
         mVenue = mRepository.getVenue();
-        mPhotos = new MutableLiveData<>();
+        mPhotos = mRepository.getPhotosResponseMutableLiveData();
     }
 
     public LiveData<Venue> getVenueLiveData(){
@@ -42,7 +42,7 @@ public class VenueDetailFragmentViewModel extends AndroidViewModel {
     }
 
     public void loadVenuePhotosFromApi(String id , String limit){
-        mPhotos = mRepository.loadVenuePhotos(id , limit) ;
+        mRepository.loadVenuePhotos(id , limit) ;
     }
 
     public String getVenueTips(){

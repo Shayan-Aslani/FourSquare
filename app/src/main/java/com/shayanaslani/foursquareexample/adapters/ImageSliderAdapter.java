@@ -32,7 +32,7 @@ public class ImageSliderAdapter extends SliderViewAdapter<ImageSliderAdapter.Sli
     @Override
     public void onBindViewHolder(ImageSliderAdapter.SliderAdapterVH viewHolder, int position) {
         Picasso.get().load(photoList.get(position).getPrefix() + "400" + photoList.get(position).getSuffix())
-                .placeholder(R.drawable.ic_icon_location)
+                .placeholder(R.drawable.laoction_place_holder)
                 .fit()
                 .into(viewHolder.imageViewBackground);
     }
